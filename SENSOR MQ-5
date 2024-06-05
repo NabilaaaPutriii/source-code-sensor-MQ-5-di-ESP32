@@ -1,0 +1,49 @@
+#include <LiquidCrystal_I2C.h>
+
+LiquidCrystal_I2C lcd(0x27, 16, 2);
+
+const int mqPin = A0;    // Pin analog untuk sensor MQ
+const int buzzerPin = 5; // Pin untuk buzzer
+const int led = 19;      // Pin untuk LED
+const int threshold = 500;  // Ambang batas deteksi gas
+
+void setup() {
+  Serial.begin(9600);
+  pinMode(buzzerPin, OUTPUT);
+  pinMode(led, OUTPUT); 
+  lcd.init();
+  lcd.backlight();
+  lcd.setCursor(1, 0);
+  lcd.print("DETEKSI GAS!");
+  delay(3000);
+  lcd.clear();
+}
+
+void loop() {
+  int gasValue = analogRead(mqPin);
+
+  Serial.print("Nilai Gas: ");
+  Serial.println(gasValue);
+
+  if (gasValue > threshold) {
+    tone(buzzerPin, 1000);  // Nyalakan buzzer jika gas terdeteksi
+    digitalWrite(led, HIGH); // Nyalakan LED
+
+    lcd.clear(); // Bersihkan layar LCD sebelum menulis
+    lcd.setCursor(0, 0);
+    lcd.print("Nilai Gas: ");
+    lcd.print(gasValue);
+    lcd.setCursor(0, 1);
+    lcd.print("BAHAYA GAS!!");
+
+  } else {
+    noTone(buzzerPin);   // Matikan buzzer jika tidak ada deteksi gas
+    digitalWrite(led, LOW); // Matikan LED
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("Nilai Gas: ");
+    lcd.print(gasValue);
+  }
+
+  delay(1000);
+}
